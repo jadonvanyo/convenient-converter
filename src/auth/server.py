@@ -43,20 +43,28 @@ def login():
         # Generate a JWT token if the username and password matched
         else:
             return createJWT(auth.username, os.environ.get("JWT_SECRET"), True)
-    # Invalid credentials if no matching info was found in the db
+    # Invalid credentials if the user does not exist in the database
     else:
         return "invalid credentials", 401
 
 
 @server.route("/validate", methods=["POST"])
 def validate():
+    """Validate a users JWT to determine if they are allowed to access the apps functions.
+
+    Returns:
+        _type_: _description_
+    """
+    # Get encoded JWT from the request headers for authorization
     encoded_jwt = request.headers["Authorization"]
 
     if not encoded_jwt:
         return "missing credentials", 401
 
+    # Split the string to just access the encoded JWT
     encoded_jwt = encoded_jwt.split(" ")[1]
 
+    # Attempt to decode the JWT
     try:
         decoded = jwt.decode(
             encoded_jwt, os.environ.get("JWT_SECRET"), algorithms=["HS256"]
@@ -68,12 +76,21 @@ def validate():
 
 
 def createJWT(username, secret, authz):
+    """Create a JSON Web Token (JWT) that encodes user information and authorization status.
+
+    Args:
+        username (str): The username of the user for whom the JWT is being created.
+        secret (str): The secret key used to sign the JWT to ensure its security and integrity.
+        authz (boolean): A boolean indicating whether the user has administrative privileges or not.
+
+    Returns:
+        str: A JSON Web Token encoded as a dictionary containing the user's data and authorization information.
+    """
     return jwt.encode(
         {
             "username": username,
-            "exp": datetime.datetime.now(tz=datetime.timezone.utc)
-            + datetime.timedelta(days=1),
-            "iat": datetime.datetime.utcnow(),
+            "exp": datetime.datetime.now(tz=datetime.timezone.utc) + datetime.timedelta(days=1),
+            "iat": datetime.datetime.now(),
             "admin": authz,
         },
         secret,
@@ -82,4 +99,5 @@ def createJWT(username, secret, authz):
 
 
 if __name__ == "__main__":
+    # Configure entry point to allow for application to listen to all public IPs
     server.run(host="0.0.0.0", port=5000)
