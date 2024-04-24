@@ -4,7 +4,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends --no-install-su
 
 WORKDIR /app
 COPY ./requirements.txt /app
-RUN pip install --no-cahche-dir --requirement /app/requirements.txt
+RUN pip install --no-cache-dir --requirement /app/requirements.txt
 COPY . /app
 
 EXPOSE 5000
