@@ -7,13 +7,11 @@ from storage import util
 from bson.objectid import ObjectId
 
 server = Flask(__name__)
+server.config["MONGO_URI"] = "mongodb://host.minikube.internal:27017/videos"
 
-mongo_video = PyMongo(server, uri="mongodb://host.minikube.internal:27017/videos")
+mongo = PyMongo(server)
 
-mongo_mp3 = PyMongo(server, uri="mongodb://host.minikube.internal:27017/mp3s")
-
-fs_videos = gridfs.GridFS(mongo_video.db)
-fs_mp3s = gridfs.GridFS(mongo_mp3.db)
+fs = gridfs.GridFS(mongo.db)
 
 # Communicate with RabbitMQ
 connection = pika.BlockingConnection(pika.ConnectionParameters("rabbitmq"))
@@ -33,4 +31,33 @@ def login():
     
 @server.route("/upload", methods=["POST"])
 def upload():
+    # Validate the token to get the access or errors
     access, err = validate.token(request)
+    
+    # Convert the JSON string to a python object
+    access = json.loads(access)
+    
+    # Determine if the token has admin permissions
+    if access["admin"]:
+        # Determine if there is one file being uploaded for conversion
+        if len(request.files) > 1 or len(request.files) < 1:
+            return "exactly 1 file required", 400
+        
+        # Loop through the key values in the request files
+        for _, f in request.files.items():
+            # Check if there were any errors in any of the values
+            err = util.upload(f, fs, channel, access)
+            
+            if err:
+                return err
+        
+        return "success!", 200
+    else:
+        return "not authorized", 401
+    
+@server.route("/download", methods=["GET"])
+def download():
+    pass
+
+if __name__ == "__main__":
+    server.run(host="0.0.0.0", port=8080)
