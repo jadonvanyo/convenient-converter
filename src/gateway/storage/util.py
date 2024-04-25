@@ -26,7 +26,9 @@ def upload(f, fs, channel, access):
                 delivery_mode=pika.spec.PERSISTENT_DELIVERY_MODE
             ),
         )
+    # Handle conditions if an error occurred
     except Exception as err:
         print(err)
+        # Delete files from the db if an error occurred
         fs.delete(fid)
         return "internal server error", 500
