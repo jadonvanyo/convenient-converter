@@ -25,8 +25,6 @@ def login():
 
     # Create cursor to execute SQL queries
     cur = mysql.connection.cursor()
-    print(cur)
-    print(mysql.connection)
     # Check db for username and password
     res = cur.execute(
         "SELECT email, password FROM user WHERE email=%s", (auth.username,)
