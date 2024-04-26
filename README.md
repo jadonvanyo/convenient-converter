@@ -38,3 +38,41 @@ This can only be done after a Dockerfile has been created and `docker build .` h
 Note: must be in the manifests directory
 
     kubectl apply -f ./
+
+## Update a Docker Image
+
+    cd [image directory]
+    docker build .
+    docker tag [image_id] jadonvanyo/[repo_name]:latest
+    docker push jadonvanyo/[repo_name]:latest
+    kubectl delete -f ./manifests
+    kubectl apply -f ./manifests
+
+## Get kubectl pods
+
+    kubectl get pods
+
+## See kubectl logs
+
+    kubectl logs [pod name]
+
+## Test Converter
+
+    curl -X POST http://mp3converter.com/login -u jadon.vanyo@gmail.com:Admin123
+    curl -X POST -F 'file=@./test.mkv' -H 'Authorization: Bearer [JWS Token]' http://mp3converter.com/upload
+
+## Scale Down Deployment for Testing
+
+    kubectl scale deployment --replicas=1 [pod name]
+
+>Note: Pod name is like gateway, converter, auth, etc.
+
+## Setup MongoDB
+
+    brew install mongodb-atlas
+    atlas setup
+
+Follow steps in the browser to sign up for a mongodb account.
+
+    atlas deployments setup
+    use videos

@@ -15,7 +15,7 @@ def token(request):
     
     # Pass the token to the validation service
     response = requests.post(
-        f"http://{os.envron.get('AUTH_SVC_ADDRESS')}/validate",
+        f"http://{os.environ.get('AUTH_SVC_ADDRESS')}/validate",
         headers={"Authorization": token},
     )
     
