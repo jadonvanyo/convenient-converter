@@ -1,6 +1,10 @@
 # convenient-converter
 convert video files to mp3s that are delivered to your email inbox
 
+## Initialization
+Starting this project will require you to create secret.yaml files for each of the following directories:
+    -
+
 ## Initialize Database
 
     mysql -u root -p < init.sql
