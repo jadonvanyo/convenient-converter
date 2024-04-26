@@ -25,6 +25,8 @@ def login():
 
     # Create cursor to execute SQL queries
     cur = mysql.connection.cursor()
+    print(cur)
+    print(mysql.connection)
     # Check db for username and password
     res = cur.execute(
         "SELECT email, password FROM user WHERE email=%s", (auth.username,)
@@ -89,8 +91,9 @@ def createJWT(username, secret, authz):
     return jwt.encode(
         {
             "username": username,
-            "exp": datetime.datetime.now(tz=datetime.timezone.utc) + datetime.timedelta(days=1),
-            "iat": datetime.datetime.now(),
+            "exp": datetime.datetime.now(tz=datetime.timezone.utc)
+            + datetime.timedelta(days=1),
+            "iat": datetime.datetime.utcnow(),
             "admin": authz,
         },
         secret,
