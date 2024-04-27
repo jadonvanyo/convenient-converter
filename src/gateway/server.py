@@ -7,7 +7,7 @@ from storage import util
 from bson.objectid import ObjectId
 
 server = Flask(__name__)
-server.config["MONGO_URI"] = "mongodb://host.minikube.internal:27017/videos"
+server.config["MONGO_URI"] = "mongodb://mongo:27017/videos"
 
 mongo = PyMongo(server)
 
@@ -16,6 +16,9 @@ fs = gridfs.GridFS(mongo.db)
 # Communicate with RabbitMQ
 connection = pika.BlockingConnection(pika.ConnectionParameters("rabbitmq"))
 channel = connection.channel()
+# Open the rabbitmq channel if it is closed
+if not channel.is_open:
+    channel.open()
 
 
 @server.route("/login", methods=["POST"])

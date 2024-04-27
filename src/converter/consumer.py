@@ -6,7 +6,7 @@ from convert import to_mp3
 
 def main():
     # Get access to the MongoDB to access the dbs for videos and mp3s
-    client = MongoClient("host.minikube.internal", 27017)
+    client = MongoClient("mongo", 27017)
     db_videos = client.videos
     db_mp3s = client.mp3s
     # Access the videos and mp3s using gridfs

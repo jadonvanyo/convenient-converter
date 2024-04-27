@@ -7,7 +7,7 @@ def upload(f, fs, channel, access):
         fid = fs.put(f)
     except Exception as err:
         print(err)
-        return f"internal server error: {err}", 500
+        return f"internal server error 1: {err}", 500
 
     # Create information on the file that was added
     message = {
@@ -31,4 +31,4 @@ def upload(f, fs, channel, access):
         print(err)
         # Delete files from the db if an error occurred
         fs.delete(fid)
-        return f"internal server error: {err}", 500
+        return f"internal server error 2: {err}", 500
