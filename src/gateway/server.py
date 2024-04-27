@@ -7,11 +7,16 @@ from storage import util
 from bson.objectid import ObjectId
 
 server = Flask(__name__)
-server.config["MONGO_URI"] = "mongodb://mongo:27017/videos"
 
-mongo = PyMongo(server)
+# Set up the mongodb servers for the video database
+mongo_video = PyMongo(server, uri="mongodb://mongo:27017/videos")
 
-fs = gridfs.GridFS(mongo.db)
+# Set up the mongodb servers for the mp3 database
+mongo_mp3 = PyMongo(server, uri="mongodb://mongo:27017/mp3s")
+
+# Set up the gridfs for the video and mp3 dbs
+fs_videos = gridfs.GridFS(mongo_video.db)
+fs_mp3s = gridfs.GridFS(mongo_mp3.db)
 
 # Communicate with RabbitMQ
 connection = pika.BlockingConnection(pika.ConnectionParameters("rabbitmq"))
@@ -49,7 +54,7 @@ def upload():
         # Loop through the key values in the request files
         for _, f in request.files.items():
             # Check if there were any errors in any of the values
-            err = util.upload(f, fs, channel, access)
+            err = util.upload(f, fs_videos, channel, access)
             
             if err:
                 return err
@@ -60,7 +65,33 @@ def upload():
     
 @server.route("/download", methods=["GET"])
 def download():
-    pass
+    access, err = validate.token(request)
+
+    # Return an error if unable to validate the token
+    if err:
+        return err
+
+    
+    access = json.loads(access)
+
+    if access["admin"]:
+        # Attempt to get the fid
+        fid_string = request.args.get("fid")
+
+        # Handle errors with the fid not being found
+        if not fid_string:
+            return "fid is required", 400
+
+        try:
+            # Return the file to the client
+            out = fs_mp3s.get(ObjectId(fid_string))
+            return send_file(out, download_name=f"{fid_string}.mp3")
+        except Exception as err:
+            print(err)
+            return "internal server error", 500
+
+    # Return an error if the user is not authorized
+    return "not authorized", 401
 
 if __name__ == "__main__":
     server.run(host="0.0.0.0", port=8080)
