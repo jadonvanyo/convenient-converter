@@ -63,7 +63,7 @@ Note: must be in the manifests directory
 
 ## Scale Down Deployment for Testing
 
-    kubectl scale deployment --replicas=1 [pod name]
+    kubectl scale deployment --replicas=1 [pod name(s)]
 
 >Note: Pod name is like gateway, converter, auth, etc.
 
@@ -76,3 +76,19 @@ Follow steps in the browser to sign up for a mongodb account.
 
     atlas deployments setup
     use videos
+
+## Connect to the MongoDB Shell
+
+    kubectl exec service/mongo -it -- /bin/bash
+    mongosh
+
+## Download the File
+
+    curl --output [filename].mp3 -X GET -H 'Authorization: Bearer [token]' "http://mp3converter.com/download?fid=[fid from email]"
+
+## End Usage
+All manifests must be up and running. Must be in the file directory as video
+
+    curl -X POST http://mp3converter.com/login -u jadon.vanyo@gmail.com:Admin123
+    curl -X POST -F 'file=@[filename]' -H 'Authorization: Bearer [Token]' http://mp3converter.com/upload
+    curl --output [filename].mp3 -X GET -H 'Authorization: Bearer [Token]' "http://mp3converter.com/download?fid=[fid from email]"
